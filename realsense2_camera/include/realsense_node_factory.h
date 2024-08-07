@@ -67,7 +67,7 @@ namespace realsense2_camera
         std::string _device_type;
         double _wait_for_device_timeout;
         double _reconnect_timeout;
-        bool _check_queries;
+        int64_t _number_of_devices;
         bool _initial_reset;
         std::thread _query_thread;
         bool _is_alive;
