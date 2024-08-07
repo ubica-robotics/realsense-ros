@@ -11,6 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//         THIS FILE CONTAINS CHANGES WHICH ARE NOT
+//         INCLUDED IN THE ORIGINAL RELEASE FROM
+//         THE GROUP INTELREALSENSE
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 #include "../include/realsense_node_factory.h"
 #include "../include/base_realsense_node.h"
@@ -84,6 +90,10 @@ void RealSenseNodeFactory::getDevice(rs2::device_list list)
         {
             ROS_WARN("No RealSense devices were found!");
         }
+        else if (_number_of_devices != -1 && _number_of_devices != list.size())
+        {
+            ROS_WARN("Not enough RealSense devices were found!");
+        }
         else
         {
             bool found = false;
@@ -94,13 +104,13 @@ void RealSenseNodeFactory::getDevice(rs2::device_list list)
                 {
                     dev = list[count];
                 }
-                catch(const std::exception& ex)
+                catch (const std::exception &ex)
                 {
-                    ROS_WARN_STREAM("Device " << count+1 << "/" << list.size() << " failed with exception: " << ex.what());
+                    ROS_WARN_STREAM("Device " << count + 1 << "/" << list.size() << " failed with exception: " << ex.what());
                     continue;
                 }
                 auto sn = dev.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER);
-                ROS_INFO_STREAM("Device with serial number " << sn << " was found."<<std::endl);
+                ROS_INFO_STREAM("Device with serial number " << sn << " was found." << std::endl);
                 std::string pn = dev.get_info(RS2_CAMERA_INFO_PHYSICAL_PORT);
                 std::string name = dev.get_info(RS2_CAMERA_INFO_NAME);
                 ROS_INFO_STREAM("Device with physical ID " << pn << " was found.");
@@ -123,7 +133,7 @@ void RealSenseNodeFactory::getDevice(rs2::device_list list)
                 }
                 else
                 {
-                    ROS_INFO_STREAM("Device with port number " << port_id << " was found.");                    
+                    ROS_INFO_STREAM("Device with port number " << port_id << " was found.");
                 }
                 bool found_device_type(true);
                 if (!_device_type.empty())
@@ -143,7 +153,7 @@ void RealSenseNodeFactory::getDevice(rs2::device_list list)
             }
             if (!found)
             {
-                std::string msg ("The requested device with ");
+                std::string msg("The requested device with ");
                 bool add_and(false);
                 if (!_serial_no.empty())
                 {
@@ -184,7 +194,6 @@ void RealSenseNodeFactory::getDevice(rs2::device_list list)
             }
         }
     }
-
     if (_device && _initial_reset)
     {
         _initial_reset = false;
@@ -272,6 +281,7 @@ void RealSenseNodeFactory::init()
         _device_type = declare_parameter("device_type", rclcpp::ParameterValue("")).get<rclcpp::PARAMETER_STRING>();
         _wait_for_device_timeout = declare_parameter("wait_for_device_timeout", rclcpp::ParameterValue(-1.0)).get<rclcpp::PARAMETER_DOUBLE>();
         _reconnect_timeout = declare_parameter("reconnect_timeout", 6.0);
+        _number_of_devices = declare_parameter("number_of_devices", rclcpp::ParameterValue(8)).get<rclcpp::PARAMETER_INTEGER>();
 
         // A ROS2 hack: until a better way is found to avoid auto convertion of strings containing only digits to integers:
         if (!_serial_no.empty() && _serial_no.front() == '_') _serial_no = _serial_no.substr(1);    // remove '_' prefix

@@ -11,6 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//         THIS FILE CONTAINS CHANGES WHICH ARE NOT
+//         INCLUDED IN THE ORIGINAL RELEASE FROM
+//         THE GROUP INTELREALSENSE
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 #pragma once
 
@@ -61,6 +67,7 @@ namespace realsense2_camera
         std::string _device_type;
         double _wait_for_device_timeout;
         double _reconnect_timeout;
+        int64_t _number_of_devices;
         bool _initial_reset;
         std::thread _query_thread;
         bool _is_alive;
