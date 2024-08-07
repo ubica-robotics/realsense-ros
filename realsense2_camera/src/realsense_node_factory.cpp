@@ -82,10 +82,6 @@ std::string RealSenseNodeFactory::parseUsbPort(std::string line)
     return port_id;
 }
 
-//else if (8 != list.size()) //TODO rmv
-//{
-//    ROS_WARN("Not enough RealSense devices were found!");
-//}
 void RealSenseNodeFactory::getDevice(rs2::device_list list)
 {
     if (!_device)
@@ -102,7 +98,6 @@ void RealSenseNodeFactory::getDevice(rs2::device_list list)
         {
             bool found = false;
             rs2::device dev;
-            ROS_INFO_STREAM("Size of device list: " << list.size() << ""); //TODO rmv
             for (size_t count = 0; count < list.size(); count++)
             {
                 try
@@ -115,17 +110,13 @@ void RealSenseNodeFactory::getDevice(rs2::device_list list)
                     continue;
                 }
                 auto sn = dev.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER);
-                ROS_INFO_STREAM("_serial_no:" << _serial_no << ""); //TODO rmv
-                ROS_INFO_STREAM("sn        :" << sn << ""); //TODO rmv
-                ROS_INFO_STREAM("Device with serial number " << sn << " was found." << std::endl); //TODO rmv
+                ROS_INFO_STREAM("Device with serial number " << sn << " was found." << std::endl);
                 std::string pn = dev.get_info(RS2_CAMERA_INFO_PHYSICAL_PORT);
                 std::string name = dev.get_info(RS2_CAMERA_INFO_NAME);
                 ROS_INFO_STREAM("Device with physical ID " << pn << " was found.");
                 std::vector<std::string> results;
                 ROS_INFO_STREAM("Device with name " << name << " was found.");
                 std::string port_id = parseUsbPort(pn);
-                ROS_INFO_STREAM("_usb_port_id:" << _usb_port_id << ""); //TODO rmv
-                ROS_INFO_STREAM("port_id     :" << port_id << ""); //TODO rmv
                 if (port_id.empty())
                 {
                     std::stringstream msg;
@@ -154,7 +145,6 @@ void RealSenseNodeFactory::getDevice(rs2::device_list list)
 
                 if ((_serial_no.empty() || sn == _serial_no) && (_usb_port_id.empty() || port_id == _usb_port_id) && found_device_type)
                 {
-                    ROS_ERROR_STREAM("Setting device!" << sn); //TODO rmv
                     _device = dev;
                     _serial_no = sn;
                     found = true;
@@ -189,7 +179,6 @@ void RealSenseNodeFactory::getDevice(rs2::device_list list)
                 }
                 msg += " is NOT found. Will Try again.";
                 ROS_ERROR_STREAM(msg);
-                //exit(1); works //TODO rmv
             }
             else
             {
@@ -203,18 +192,8 @@ void RealSenseNodeFactory::getDevice(rs2::device_list list)
                     }
                 }
             }
-//            if(!_device) works //TODO rmv
-//                exit(1);
-            ROS_INFO_STREAM("hehe device: " << _device); //TODO rmv
-            }
-            ROS_INFO_STREAM("hehehe device: " << _device); //TODO rmv
-//        if (!_device) fails //TODO rmv
-//            exit(1);
+        }
     }
-//    if (!_device) fails //TODO rmv
-//        exit(1);
-    ROS_ERROR_STREAM("debug-str1" << ""); //TODO rmv
-    std::cout << "std::debug-str1" << std::endl; //TODO rmv
     if (_device && _initial_reset)
     {
         _initial_reset = false;
@@ -230,8 +209,6 @@ void RealSenseNodeFactory::getDevice(rs2::device_list list)
             ROS_WARN_STREAM("An exception has been thrown: " << __FILE__ << ":" << __LINE__ << ":" << ex.what());
         }
     }
-    std::cout << "std::debug-str2" << std::endl; //TODO rmv
-    ROS_ERROR_STREAM("debug-str2" << ""); //TODO rmv
 }
 
 void RealSenseNodeFactory::changeDeviceCallback(rs2::event_information& info)
@@ -333,24 +310,17 @@ void RealSenseNodeFactory::init()
                 rclcpp::Time first_try_time = this->get_clock()->now();
                 while (_is_alive && !_device)
                 {
-                    ROS_ERROR_STREAM("While loop start" << ""); //TODO rmv
                     try
                     {
-                        ROS_ERROR_STREAM("Trying to get device" << ""); //TODO rmv
-                        auto q_devs = _ctx.query_devices();
-                        ROS_ERROR_STREAM("Got some devices!" << ""); //TODO rmv
-                        getDevice(q_devs);
-                        ROS_ERROR_STREAM("End of getDevice!" << ""); //TODO rmv
+                        getDevice(_ctx.query_devices());
                         if (_device)
                         {
-                            ROS_ERROR_STREAM("Found device" << ""); //TODO rmv
                             std::function<void(rs2::event_information&)> change_device_callback_function = [this](rs2::event_information& info){changeDeviceCallback(info);};
                             _ctx.set_devices_changed_callback(change_device_callback_function);
                             startDevice();
                         }
                         else
                         {
-                            ROS_ERROR_STREAM("Did NOT found device" << ""); //TODO rmv
                             std::chrono::milliseconds actual_timespan(timespan);
                             if (_wait_for_device_timeout > 0)
                             {
@@ -366,9 +336,7 @@ void RealSenseNodeFactory::init()
                                     actual_timespan = std::chrono::milliseconds (static_cast<int>(std::min(max_timespan_secs, time_to_timeout) * 1e3));
                                 }
                             }
-                            ROS_ERROR_STREAM("Sleeping for " << actual_timespan.count() << " milliseconds"); //TODO rmv
                             std::this_thread::sleep_for(actual_timespan);
-                            ROS_ERROR_STREAM("Done sleeping" << ""); //TODO rmv
                         }
                     }
                     catch(const std::exception& e)
